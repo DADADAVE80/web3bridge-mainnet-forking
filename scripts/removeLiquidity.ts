@@ -1,4 +1,5 @@
 import {ethers} from "hardhat";
+
 const helpers = require("@nomicfoundation/hardhat-toolbox/network-helpers");
 
 const main = async () => {
@@ -20,8 +21,8 @@ const main = async () => {
 
     const amountADesired = ethers.parseUnits("3000000", 6);
     const amountBDesired = ethers.parseUnits("90000000", 18);
-    const amountAMin = 0;
-    const amountBMin = 0;
+    const amountAMin = ethers.parseUnits("300000", 6);
+    const amountBMin = ethers.parseUnits("9000000", 18);
 
     const approveTx1 = await USDC.connect(impersonatedSigner).approve(UNIRouter, amountADesired);
     await approveTx1.wait();
@@ -61,6 +62,34 @@ const main = async () => {
     console.log("USDC Balance After Liq:", ethers.formatUnits(USDCBalAfter, 6));
     console.log("DAI Balance After Liq:", ethers.formatUnits(DAIBalAfter, 18));
     console.log("WETH Balance After Liq:", ethers.formatUnits(WETHBalAfter, 18));
+
+    const [amountA, amountB, liquidity] = addLiqudityTx;
+
+    const approveTx3 = await USDC.connect(impersonatedSigner).approve(address, amountADesired);
+    await approveTx3.wait();
+
+    const approveTx4 = await DAI.connect(impersonatedSigner).approve(address, amountBDesired);
+    await approveTx4.wait();
+
+    const removeLiquidityTx = await ROUTER.connect(impersonatedSigner).removeLiquidity(
+        USDCAddress,
+        DAIAddress,
+        liquidity,
+        amountAMin,
+        amountBMin,
+        address,
+        deadline
+    );
+
+    await removeLiquidityTx.wait();
+
+    const USDCBalRm = await USDC.balanceOf(impersonatedSigner.address);
+    const DAIBalRm = await DAI.balanceOf(impersonatedSigner.address);
+    const WETHBalRm = await WETH.balanceOf(impersonatedSigner.address);
+
+    console.log("USDC Balance Rem Liq:", ethers.formatUnits(USDCBalRm, 6));
+    console.log("DAI Balance Rem Liq:", ethers.formatUnits(DAIBalRm, 18));
+    console.log("WETH Balance Rem Liq:", ethers.formatUnits(WETHBalRm, 18));
 }
 
 main().catch((error) => {
